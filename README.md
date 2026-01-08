@@ -49,9 +49,26 @@ Resultado esperado:
 - OUT → GPIO18
 
 <p align="center">
-  <img src="assets/modules.png" alt="Logo" width="500"/>
+  <img src="assets/modules.png" alt="Logo" width="300"/>
 </p>
----
+
+
+## Conexión modulos
+
+<p align="center">
+  <img src="assets/raspberry-pinout.jpg" alt="Logo" width="300"/>
+</p>
+
+**Emisor**:
+* VCC -> PIN 2
+* GND -> PIN 6
+* DAT -> PIN 16 -> GPIO 23
+
+**Receptor**:
+* VCC -> PIN 3
+* GND -> PIN 6
+* DAT -> PIN 12 -> GPIO 18
+
 
 ## Recepción y Emision IR – Modo RAW
 
