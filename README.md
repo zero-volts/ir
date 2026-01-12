@@ -1,17 +1,21 @@
 # Raspberry Pi IR Integracion de modulos IR
 
-Este documento registra **todo el proceso real** seguido para lograr **transmisión y recepción infrarroja (IR)** en una Raspberry Pi,
+Este documento registra **el proceso real que me funcionó** para lograr **transmisión y recepción infrarroja (IR)** en una Raspberry Pi usando el stack del kernel (`/dev/lirc*`) y la herramienta **`ir-ctl`** (paquete `v4l-utils`).
 
-> ⚠️ Importante: este NO es un tutorial. Aquí se documenta la forma que a mi me funciono la conexion y pruebas de los modulos con la raspberry
+> ⚠️ Importante: esto **no** pretende ser un tutorial universal. Documenta *mi* conexión + comandos + pruebas que funcionaron
 ---
 
-## Paquetes a instalar
+## 1) Paquetes a instalar
 
-Para hacer pruebas se debe isntalar el paquete `v4l-utils` el cual contiene `ir-ctl`
+Para hacer pruebas se debe instalar el paquete `v4l-utils` el cual incluye `ir-ctl`
+```bash
+sudo apt update
+sudo apt install -y v4l-utils
+```
 
 ---
 
-## Actualizar config.txt
+## 2) Actualizar config.txt
 
 Para que podamos usar los GPIO es necesario modificar el archivo 
 `/boot/firmware/config.txt`
@@ -29,8 +33,9 @@ Luego de estos cambios reiniciar el sistema.
 
 ---
 
-## Verificación de dispositivos
+## 3) Verificación de dispositivos
 
+Listar dispositvos LIRC:
 ```bash
 ls -l /dev/lirc*
 ```
@@ -41,7 +46,7 @@ Resultado esperado:
 
 ---
 
-## Hardware
+## 4) Hardware
 
 ### Receptor IR
 - Módulo genérico 38kHz (VS1838, KY-022)
@@ -53,7 +58,7 @@ Resultado esperado:
 </p>
 
 
-## Conexión modulos
+## 5) Conexión módulos
 
 <p align="center">
   <img src="assets/raspberry-pinout.jpg" alt="Logo" width="300"/>
@@ -65,14 +70,14 @@ Resultado esperado:
 * DAT -> PIN 16 -> GPIO 23
 
 **Receptor**:
-* VCC -> PIN 3
+* VCC -> PIN 4
 * GND -> PIN 6
 * DAT -> PIN 12 -> GPIO 18
 
 
-## Recepción y Emision IR – Modo RAW
+## 6) Recepción y Emision IR – Modo RAW
 
-Para poder recibir y probar en la raspbery si la conexio nesta correcta se debe ejecutar el sigueinte comando en la terminal
+Para poder recibir y probar en la raspbery si la conexion esta correcta se debe ejecutar el sigueinte comando en la terminal
 ```bash
 sudo ir-ctl -r -d /dev/lirc1
 ```
@@ -83,10 +88,18 @@ sudo ir-ctl -r -d /dev/lirc1
 - `-d /dev/lirc1` : dispositivo LIRC del receptor
 
 El ejecutar el comando se queda a la escucha y al momento de apuntar y presionar el control
-hacia el receptor deberia verse algo como esto:
+hacia el receptor deberia ver pulsos/espacios como:
 ```
 +1290 -403 +1269 -405 +383 -1291 +1271 -403 +1271 -403 +407 -1267 +407 -1269 +425 -1248 ...
 ```
+
+**Qué significa:**
+- `+` = pulso (IR encendido)
+- `-` = espacio (IR apagado)
+- los números son duraciones (µs)
+---
+
+### 6.1 Grabar una señal a archivo .raw
 
 Cuando queremos grabar una señal debemos hacer lo mismo pero simplemente redireccionando la salida a un archivo
 
@@ -95,12 +108,14 @@ sudo ir-ctl -r -d /dev/lirc1 > power.raw
 ```
 ---
 
+### 6.2 Transmitir una señal guardada
+
 Para transmitir la señal guardada lo hacemos de esta forma
 ```bash
-sudo ir-ctl -d /dev/lirc0 -s power_tx.raw
+sudo ir-ctl -d /dev/lirc0 -s power.raw
 ```
 
-## Loopback (TX → RX) para confirmar emisión
+## 7) Loopback (TX → RX) para confirmar emisión
 
 Se realizó una prueba de “loopback”:
 - LED emisor apuntando al receptor a **1–2 cm**
@@ -112,5 +127,11 @@ sudo ir-ctl -r -d /dev/lirc1
 
 Terminal B (TX):
 ```bash
-sudo ir-ctl -d /dev/lirc0 -s tx_burst.raw
+sudo ir-ctl -d /dev/lirc0 -s power.raw
 ```
+
+### Capitulos de youtube
+-----
+Videos con el proceso de configuración y pruebas 
+
+1. [Configuración y uso de control](https://www.youtube.com/watch?v=7I1J5ifFpYI)
